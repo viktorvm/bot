@@ -18,7 +18,7 @@ def start(message):
     if db_worker.select_single(message.chat.id):
         bot.send_message(message.chat.id, 'Не волнуйся, я тебя не забыл. Ты у меня уже на заметке, напоминаю каждый день про отчет:)')
     else:
-        markup = utils.generate_markup('Да. То, что нужно!')
+        markup = utils.generate_markup(['Да. То, что нужно!'])
         bot.send_message(message.chat.id, 'Привет! Я бот, который поможет тебе не забыть писать ежедневный отчет! Напоминать тебе об этом?', reply_markup=markup)
 
 @bot.message_handler(func=lambda message: True, content_types=['text'])
@@ -26,13 +26,16 @@ def repeat_all_messages(message): # Название функции не игр�
     db_worker = SQLighter(config.database_name)
 
     if message.text == u'Да. То, что нужно!':
-        with db_worker.connection:
-            db_worker.add_row(message.chat.id)
-            bot.send_message(message.chat.id, 'Больше тебе приседать не придется:) Я буду ежедневно напоминать тебе об отчете каждый час, начиная с 20:00. До связи!',
+        db_worker.add_row(message.chat.id)
+        bot.send_message(message.chat.id, 'Больше тебе приседать не придется:) Я буду ежедневно напоминать тебе об отчете каждый час, начиная с 20:00. До связи!',
                              reply_markup=utils.hide_markup())
-
+    elif message.text == u'+':
+        db_worker.upd_col('done', 1, message.chat.id)
+        bot.send_message(message.chat.id, 'Отлично! встретимся завтра:)')
+    elif message.text == u'Спроси в другой раз':
+        bot.send_message(message.chat.id, 'Окей, напомню через час...только если сейчас не 11. Я еще по времени не особо ориентируюсь, пока самостоятельно сообрази:)')
     else:
-        bot.send_message(message.chat.id, message.text)
+        bot.send_message(message.chat.id, 'Извини, такой команды я не знаю. Я пока примитивный глуповатый бот:( Но я учусь')
 
 def cyclic():
     print 'its me'

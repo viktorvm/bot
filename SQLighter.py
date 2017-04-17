@@ -8,7 +8,8 @@ class SQLighter:
         self.cursor = self.connection.cursor()
 
     def add_row(self, chat_id):
-        return self.cursor.execute('INSERT INTO botMemory(chat_id, done) VALUES(' + str(chat_id) + ', 0)')
+        with self.connection:
+            return self.cursor.execute('INSERT INTO botMemory(chat_id, done) VALUES(' + str(chat_id) + ', 0)')
 
     def select_all(self):
         """ Получаем все строки """
@@ -19,6 +20,10 @@ class SQLighter:
         """ Получаем одну строку с номером rownum """
         with self.connection:
             return self.cursor.execute('SELECT * FROM botMemory WHERE chat_id = ?', (rownum,)).fetchall()
+
+    def upd_col(self, col, val, id):
+        with self.connection:
+            return self.cursor.execute('UPDATE botMemory SET ' + str(col) + ' = ' + str(val) + ' WHERE chat_id = ' + str(id))
 
     def count_rows(self):
         """ Считаем количество строк """
