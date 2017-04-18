@@ -32,14 +32,17 @@ checked11pm = False
 
 def cyclicCheck():
     now = datetime.datetime.now()
+
+    print now
+
     global checked8pm
     global checked9pm
     global checked10pm
     global checked11pm
 
-    markup = utils.generate_markup(['+', 'Спроси в другой раз'])
+    markup = utils.generate_markup(['+', 'Спроси в другой раз', 'Забудь про меня'])
 
-    if (now > now.replace(hour=23, minute=59, second=50, microsecond=0) and now < now.replace(hour=23, minute=59, second=54, microsecond=0)):
+    if (now > now.replace(hour=23, minute=59, second=35, microsecond=0) and now < now.replace(hour=23, minute=59, second=50, microsecond=0)):
         checked8pm = False
         checked9pm = False
         checked10pm = False
@@ -47,35 +50,33 @@ def cyclicCheck():
         for x in db_entries:
             db_worker.upd_col('done', 0, x[1])
 
-    if now > time8pm and not checked8pm:
+    if (now > time8pm) and now < time9pm and not checked8pm:
         for x in db_entries:
-            print x
             if (not x[2]):
                 bot.send_message(x[1], 'Отчет готов?',
                                  reply_markup=markup)
         checked8pm = True
-    if now > time9pm and not checked9pm:
+    if now > time9pm and now < time10pm and not checked9pm:
         for x in db_entries:
-            print x
             if (not x[2]):
                 bot.send_message(x[1], 'Отчет готов?',
                                  reply_markup=markup)
         checked9pm = True
-    if now > time10pm and not checked10pm:
+    if now > time10pm and now < time11pm and not checked10pm:
         for x in db_entries:
             print x
             if (not x[2]):
                 bot.send_message(x[1], 'Отчет готов?',
                                  reply_markup=markup)
         checked10pm = True
-    if now > time11pm and not checked11pm:
+    if now > time11pm and now < now.replace(hour=23, minute=59, second=50, microsecond=0) and not checked11pm:
         for x in db_entries:
             print x
             if (not x[2]):
                 bot.send_message(x[1], 'Отчет готов?',
                                  reply_markup=markup)
         checked11pm = True
-    sleep(5)
+    sleep(15)
     cyclicCheck()
 
 cyclicCheck()

@@ -21,9 +21,13 @@ class SQLighter:
         with self.connection:
             return self.cursor.execute('SELECT * FROM botMemory WHERE chat_id = ?', (rownum,)).fetchall()
 
-    def upd_col(self, col, val, id):
+    def upd_col(self, col, val, chat_id):
         with self.connection:
-            return self.cursor.execute('UPDATE botMemory SET ' + str(col) + ' = ' + str(val) + ' WHERE chat_id = ' + str(id))
+            return self.cursor.execute('UPDATE botMemory SET ' + str(col) + ' = ' + str(val) + ' WHERE chat_id = ' + str(chat_id))
+
+    def delete_row(self, chat_id):
+        with self.connection:
+            return self.cursor.execute('DELETE from botMemory WHERE chat_id = ' + str(chat_id))
 
     def count_rows(self):
         """ Считаем количество строк """
