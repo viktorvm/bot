@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import datetime
-
 import telebot
 
 import config
 import utils
 
-from time import sleep
 from SQLighter import SQLighter
 
 
@@ -16,67 +13,25 @@ bot = telebot.TeleBot(config.token)
 db_worker = SQLighter(config.database_name)
 db_entries = db_worker.select_all()
 
-now = datetime.datetime.now()
+def remind():
+    for x in db_entries:
+        try:
+            if (x['need_remind'] and not x['done']):
+                markup = utils.generate_markup(['+', 'Спроси в другой раз']) if x['reminds_today'] < 3 \
+                    else utils.generate_markup(['+', 'Беру на себя всю ответственность'])
 
-time8pm = now.replace(hour=20, minute=0, second=0, microsecond=0)
-checked8pm = False
+                name = ', ' + x['chat_first_name'].encode('utf-8') if x['chat_first_name'] else ''
 
-time9pm = now.replace(hour=21, minute=0, second=0, microsecond=0)
-checked9pm = False
+                mes_text = 'Привет' + name + '! Отчет уже написан?' if x['reminds_today'] == 0 \
+                    else 'Это снова я. Как твой отчет, готов?' if x['reminds_today'] == 1 \
+                    else 'Время уже позднее, про отчет не забудь. Или уже написан?' if x['reminds_today'] == 2 \
+                    else 'Не забудь про отчет. На сегодня беспокою тебя в последний раз. ' \
+                         'Напиши мне + когда будет готово. Спокойной ночи)' if x['reminds_today'] == 3 \
+                    else 'Отчет готов?'
 
-time10pm = now.replace(hour=22, minute=0, second=0, microsecond=0)
-checked10pm = False
+                db_worker.upd_col('reminds_today', int(x['reminds_today']) + 1, x['chat_id'])
+                bot.send_message(x['chat_id'], mes_text, reply_markup=markup)
+        except Exception:
+            db_worker.upd_col('errors', int(x['errors'])+1, x['chat_id'])
 
-time11pm = now.replace(hour=22, minute=0, second=0, microsecond=0)
-checked11pm = False
-
-def cyclicCheck():
-    now = datetime.datetime.now()
-
-    print now
-
-    global checked8pm
-    global checked9pm
-    global checked10pm
-    global checked11pm
-
-    markup = utils.generate_markup(['+', 'Спроси в другой раз', 'Забудь про меня'])
-
-    if (now > now.replace(hour=23, minute=59, second=35, microsecond=0) and now < now.replace(hour=23, minute=59, second=50, microsecond=0)):
-        checked8pm = False
-        checked9pm = False
-        checked10pm = False
-        checked11pm = False
-        for x in db_entries:
-            db_worker.upd_col('done', 0, x[1])
-
-    if (now > time8pm) and now < time9pm and not checked8pm:
-        for x in db_entries:
-            if (not x[2]):
-                bot.send_message(x[1], 'Отчет готов?',
-                                 reply_markup=markup)
-        checked8pm = True
-    if now > time9pm and now < time10pm and not checked9pm:
-        for x in db_entries:
-            if (not x[2]):
-                bot.send_message(x[1], 'Отчет готов?',
-                                 reply_markup=markup)
-        checked9pm = True
-    if now > time10pm and now < time11pm and not checked10pm:
-        for x in db_entries:
-            print x
-            if (not x[2]):
-                bot.send_message(x[1], 'Отчет готов?',
-                                 reply_markup=markup)
-        checked10pm = True
-    if now > time11pm and now < now.replace(hour=23, minute=59, second=50, microsecond=0) and not checked11pm:
-        for x in db_entries:
-            print x
-            if (not x[2]):
-                bot.send_message(x[1], 'Отчет готов?',
-                                 reply_markup=markup)
-        checked11pm = True
-    sleep(15)
-    cyclicCheck()
-
-cyclicCheck()
+remind()
