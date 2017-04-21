@@ -11,7 +11,7 @@ import utils
 from SQLighter import SQLighter
 
 logging.basicConfig(format = u'%(levelname)-8s [%(asctime)s] %(message)s',
-                    level = logging.DEBUG, filename = u'botlog.log')
+                    level = logging.DEBUG, filename = config.botlog_name)
 logging.info(u'PomniBot started')
 
 bot = telebot.TeleBot(config.token)

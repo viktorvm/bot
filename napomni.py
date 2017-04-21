@@ -10,7 +10,7 @@ import utils
 from SQLighter import SQLighter
 
 logging.basicConfig(format = u'%(levelname)-8s [%(asctime)s] %(message)s',
-                    level = logging.DEBUG, filename = u'napomnilog.log')
+                    level = logging.DEBUG, filename = config.napomnilog_name)
 logging.info(u'Napomni module started')
 
 bot = telebot.TeleBot(config.token)

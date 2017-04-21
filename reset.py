@@ -7,14 +7,12 @@ import config
 from SQLighter import SQLighter
 
 logging.basicConfig(format = u'%(levelname)-8s [%(asctime)s] %(message)s',
-                    level = logging.DEBUG, filename = u'resetlog.log')
+                    level = logging.DEBUG, filename = config.resetlog_name)
 logging.info(u'Reset module started')
-
-db_worker = SQLighter(config.database_name)
-db_entries = db_worker.select_all()
 
 def reset_day():
     try:
+        db_worker = SQLighter(config.database_name)
         db_worker.reset_day()
     except Exception as e:
         logging.error(e)
