@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import logging
+
 import telebot
 
 import config
@@ -7,6 +9,9 @@ import utils
 
 from SQLighter import SQLighter
 
+logging.basicConfig(format = u'%(levelname)-8s [%(asctime)s] %(message)s',
+                    level = logging.DEBUG, filename = u'napomnilog.log')
+logging.info(u'Napomni module started')
 
 bot = telebot.TeleBot(config.token)
 
@@ -31,7 +36,10 @@ def remind():
 
                 db_worker.upd_col('reminds_today', int(x['reminds_today']) + 1, x['chat_id'])
                 bot.send_message(x['chat_id'], mes_text, reply_markup=markup)
-        except Exception:
+        except Exception as e:
             db_worker.upd_col('errors', int(x['errors'])+1, x['chat_id'])
+            logging.error(e)
+
+    logging.info(u'Napomni module ended')
 
 remind()
